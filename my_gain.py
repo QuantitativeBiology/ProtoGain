@@ -16,6 +16,9 @@ import cProfile
 import pstats
 
 
+start_time = time.time()
+
+
 def generate_mask(data, miss_rate):
     dim = data.shape[1]
     size = data.shape[0]
@@ -351,23 +354,23 @@ def train_v2(
         ).mean() / (1 - mask_batch).mean()
 
         if epoch % 100 == 0:
-            s = f"{epoch}: loss D={loss_D.detach().numpy(): .3f}  loss G={loss_G.detach().numpy(): .3f}  mse train={loss_MSE_train[epoch]: .4f}  mse test={loss_MSE_test[epoch]: .3f}"
+            s = f"{epoch}: loss D={loss_D.detach().numpy(): .3f}  loss G={loss_G.detach().numpy(): .3f}  rmse train={np.sqrt(loss_MSE_train[epoch]): .4f}  rmse test={np.sqrt(loss_MSE_test[epoch]): .3f}"
             pbar.clear()
             # logger.info('{}'.format(s))
             pbar.set_description(s)
 
         sample_G = generate_sample(data_test, mask_test)
         loss_MSE_testsplit[epoch] = (
-            loss_mse((1 - mask_test) * data_test, (1 - mask_test) * sample_G)
-        ).mean() / (1 - mask_test).mean()
-
-        loss_D_values[epoch] = loss_D.detach().numpy()
-        loss_G_values[epoch] = loss_G.detach().numpy()
+            loss_mse(mask_test * data_test, mask_test * sample_G)
+        ).mean()
 
         sample_G = generate_sample(missing_data, mask)
         loss_MSE_all[epoch] = (
             loss_mse((1 - mask) * data, (1 - mask) * sample_G)
         ).mean() / (1 - mask).mean()
+
+        loss_D_values[epoch] = loss_D.detach().numpy()
+        loss_G_values[epoch] = loss_G.detach().numpy()
 
         # print("Data:\n", data, scaler.inverse_transform(data), "\nImputed:\n", fake_X, scaler.inverse_transform(fake_X.detach().numpy()))
 
@@ -416,100 +419,141 @@ def train_v2(
 
 if __name__ == "__main__":
     with cProfile.Profile() as profile:
-        dataset = "spam"
+
+        data_samples = [
+            455,
+            409,
+            364,
+            318,
+            273,
+            227,
+            204,
+            182,
+            159,
+            136,
+            113,
+            91,
+            68,
+            45,
+        ]  # breast size
+        dataset = "breast"
         folder = "~/LeandroSobralThesis/" + dataset + "/"
 
-        params = Params.read_hyperparameters("parameters.json")
-        loss_MSE_train_final = np.zeros(params.num_runs)
-        loss_MSE_test_final = np.zeros(params.num_runs)
+        for samples in data_samples:
 
-        df_data = pd.read_csv(folder + dataset + ".csv")
-        # features = list(df_data.columns)
-        data = df_data.values
-        data_header = df_data.columns.tolist()
+            params = Params.read_hyperparameters("parameters.json")
+            loss_MSE_train_final = np.zeros(params.num_runs)
+            loss_MSE_test_final = np.zeros(params.num_runs)
+            run_time = np.zeros(params.num_runs)
 
-        df_missing = pd.read_csv(
-            f"{folder}{dataset}Missing_{int(params.miss_rate * 100)}.csv"
+            df_data = pd.read_csv(folder + dataset + ".csv")
+            # features = list(df_data.columns)
+            data = df_data.values
+            data_header = df_data.columns.tolist()
+
+            df_missing = pd.read_csv(
+                f"{folder}{dataset}Missing_{int(params.miss_rate * 100)}.csv"
+            )
+            missing = df_missing.values
+
+            mask = np.where(np.isnan(missing), 0.0, 1.0)
+            missing_data = np.where(mask, missing, 0.0)
+            hint = generate_hint(mask, params.hint_rate)
+            # missing_data = missing_data[:2500]
+            # mask = mask[:2500]
+            range_scaler = (0, 1)
+            scaler = MinMaxScaler(feature_range=range_scaler)
+            missing_data = scaler.fit_transform(missing_data)
+            data = scaler.transform(data)
+            # mask = scaler.transform(mask)
+            # hint = scaler.transform(hint)
+
+            dim = missing_data.shape[1]
+            size = missing_data.shape[0]
+
+            missing_data = torch.from_numpy(missing_data)
+            mask = torch.from_numpy(mask)
+            hint = torch.from_numpy(hint)
+
+            # combined_dataset = torch.utils.data.TensorDataset(missing_data, mask, hint)
+
+            train_size = int(size * params.train_ratio)
+            train_data, test_data = torch.utils.data.random_split(
+                combined_dataset, [train_size, size - train_size]
+            )
+
+            h_dim1 = dim
+            h_dim2 = dim
+
+            for run in range(params.num_runs):
+                start_run_time = time.time()
+                print(
+                    "\n\nStarting run number", run + 1, "out of", params.num_runs, "\n"
+                )
+
+                data_iter = torch.utils.data.DataLoader(
+                    train_data, params.batch_size, pin_memory=True, num_workers=8
+                )
+
+                net_G = nn.Sequential(
+                    nn.Linear(dim * 2, h_dim1),
+                    nn.ReLU(),
+                    nn.Linear(h_dim1, h_dim2),
+                    nn.ReLU(),
+                    nn.Linear(h_dim2, dim),
+                    nn.Sigmoid(),
+                )
+
+                net_D = nn.Sequential(
+                    nn.Linear(dim * 2, h_dim1),
+                    nn.ReLU(),
+                    nn.Linear(h_dim1, h_dim2),
+                    nn.ReLU(),
+                    nn.Linear(h_dim2, dim),
+                    nn.Sigmoid(),
+                )
+
+                train_v2(
+                    net_D,
+                    net_G,
+                    params.lr_D,
+                    params.lr_G,
+                    data_iter,
+                    params.num_epochs,
+                    params.batch_size,
+                    train_size,
+                    data,
+                    train_data,
+                    test_data,
+                    missing_data,
+                    params.alpha,
+                    mask,
+                    run,
+                )
+
+                run_time[run] = time.time() - start_run_time
+
+        utils.create_csv(
+            run_time,
+            folder
+            + "results/"
+            + f"run_time_{int(params.miss_rate * 100)}_{train_size}",
+            "Time for each run in seconds",
         )
-        missing = df_missing.values
-
-        mask = np.where(np.isnan(missing), 0.0, 1.0)
-        missing_data = np.where(mask, missing, 0.0)
-        hint = generate_hint(mask, params.hint_rate)
-        # missing_data = missing_data[:2500]
-        # mask = mask[:2500]
-        range_scaler = (0, 1)
-        scaler = MinMaxScaler(feature_range=range_scaler)
-        missing_data = scaler.fit_transform(missing_data)
-        data = scaler.transform(data)
-        # mask = scaler.transform(mask)
-        # hint = scaler.transform(hint)
-
-        dim = missing_data.shape[1]
-        size = missing_data.shape[0]
-
-        missing_data = torch.from_numpy(missing_data)
-        mask = torch.from_numpy(mask)
-        hint = torch.from_numpy(hint)
-
-        combined_dataset = torch.utils.data.TensorDataset(missing_data, mask, hint)
-
-        train_size = int(size * params.train_ratio)
-        train_data, test_data = torch.utils.data.random_split(
-            combined_dataset, [train_size, size - train_size]
-        )
-
-        h_dim1 = dim
-        h_dim2 = dim
-
-        for run in range(params.num_runs):
-            print("\n\nStarting run number", run + 1, "out of", params.num_runs, "\n")
-
-            data_iter = torch.utils.data.DataLoader(
-                train_data,
-                params.batch_size,
-                pin_memory=True,
-            )
-
-            net_G = nn.Sequential(
-                nn.Linear(dim * 2, h_dim1),
-                nn.ReLU(),
-                nn.Linear(h_dim1, h_dim2),
-                nn.ReLU(),
-                nn.Linear(h_dim2, dim),
-                nn.Sigmoid(),
-            )
-
-            net_D = nn.Sequential(
-                nn.Linear(dim * 2, h_dim1),
-                nn.ReLU(),
-                nn.Linear(h_dim1, h_dim2),
-                nn.ReLU(),
-                nn.Linear(h_dim2, dim),
-                nn.Sigmoid(),
-            )
-
-            train_v2(
-                net_D,
-                net_G,
-                params.lr_D,
-                params.lr_G,
-                data_iter,
-                params.num_epochs,
-                params.batch_size,
-                train_size,
-                data,
-                train_data,
-                test_data,
-                missing_data,
-                params.alpha,
-                mask,
-                run,
-            )
-
-        print(missing_data, mask)
 
     results = pstats.Stats(profile)
     results.sort_stats(pstats.SortKey.TIME)
     # results.print_stats()
     results.dump_stats("results.prof")
+
+    time_delta = []
+    time_delta.append(time.time() - start_time)
+    print("--- %s seconds ---" % (time_delta[0]))
+
+    utils.create_csv(
+        time_delta,
+        folder
+        + "results/"
+        + f"total_run_time_{int(params.miss_rate * 100)}_{train_size}",
+        "Total run time (s)",
+    )

@@ -1,11 +1,12 @@
 {
-    "num_epochs": 1000,
+    "num_epochs": 2000,
     "batch_size": 128, 
     "alpha": 10, 
     "miss_rate": 0.2, 
     "hint_rate": 0.9, 
+    "train_ratio": 0.8,
     "lr_D": 0.001, 
     "lr_G": 0.001,
-    "num_runs": 20
+    "num_runs": 50
     
 }
