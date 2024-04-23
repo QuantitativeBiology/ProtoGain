@@ -41,6 +41,9 @@ def init_arg():
         "--lrg", type=float, default=0.001, help="learning rate for the generator"
     )
     parser.add_argument("--parameters", help="load a parameters.json file")
+    parser.add_argument(
+        "--override", type=int, default=0, help="override previous files"
+    )
     return parser.parse_args()
 
 
@@ -141,6 +144,7 @@ def train_v2(
     combined_dataset_train,
     output_file,
     missing_header,
+    override,
 ):
     cpu = []
     ram = []
@@ -235,44 +239,40 @@ def train_v2(
         output_folder + output_file,
         missing_header,
     )
-    utils.create_csv(
+    utils.create_output(
         loss_D_values,
-        output_folder + "lossD",
-        "loss D",
+        output_folder + "lossD.csv",
+        override,
     )
-    utils.create_csv(
+    utils.create_output(
         loss_G_values,
-        output_folder + "lossG",
-        "loss G",
+        output_folder + "lossG.csv",
+        override,
     )
-    utils.create_csv(
+    utils.create_output(
         loss_MSE_train,
-        output_folder + "lossMSE_train",
-        "loss MSE train",
+        output_folder + "lossMSE_train.csv",
+        override,
     )
 
-    utils.create_csv(
+    utils.create_output(
         loss_MSE_test,
-        output_folder + "lossMSE_test",
-        "loss MSE test",
+        output_folder + "lossMSE_test.csv",
+        override,
     )
 
-    utils.create_csv(
+    utils.create_output(
         cpu,
-        output_folder + "cpu",
-        "cpu usage",
+        output_folder + "cpu.csv",
+        override,
     )
 
-    utils.create_csv(
-        ram,
-        output_folder + "ram",
-        "ram usage",
-    )
+    utils.create_output(ram, output_folder + "ram.csv", override)
 
-    utils.create_csv(
+    utils.create_output(
         ram_percentage,
-        output_folder + "ram_percentage",
-        "ram percentage usage",
+        output_folder + "ram_percentage.csv",
+        override,
     )
 
 
@@ -296,9 +296,10 @@ if __name__ == "__main__":
         lr_D = args.lrd
         lr_G = args.lrg
         parameters_file = args.parameters
+        override = args.override
 
         if parameters_file is not None:
-            params = Params.read_hyperparameters("parameters.json")
+            params = Params.read_hyperparameters(parameters_file)
             missing_file = params.input
             output_file = params.output
             ref_file = params.ref
@@ -310,10 +311,7 @@ if __name__ == "__main__":
             train_ration = params.train_ratio
             lr_D = params.lr_D
             lr_G = params.lr_G
-
-        loss_MSE_train_final = np.zeros(params.num_runs)
-        loss_MSE_test_final = np.zeros(params.num_runs)
-        run_time = np.zeros(params.num_runs)
+            override = params.override
 
         df_missing = pd.read_csv(missing_file)
         missing = df_missing.values
@@ -396,31 +394,28 @@ if __name__ == "__main__":
             combined_dataset_train,
             output_file,
             missing_header,
+            override,
         )
 
         run_time = []
         run_time.append(time.time() - start_time)
         file_path = output_folder + "run_time.csv"
 
-        if os.path.exists(file_path):
-            with open(file_path, "a") as myfile:
-                myfile.write(str(run_time[0]) + "\n")
-
-        else:
+        if override == 1:
             df_run_time = pd.DataFrame(run_time)
             df_run_time.to_csv(file_path, index=False)
 
+        else:
+            if os.path.exists(file_path):
+                with open(file_path, "a") as myfile:
+                    myfile.write(str(run_time[0]) + "\n")
+
+            else:
+                df_run_time = pd.DataFrame(run_time)
+                df_run_time.to_csv(file_path, index=False)
+
+    print("\n--- %s seconds ---\n\n" % (run_time[0]))
     results = pstats.Stats(profile)
     results.sort_stats(pstats.SortKey.TIME)
     # results.print_stats()
     results.dump_stats("results.prof")
-
-    time_delta = []
-    time_delta.append(time.time() - start_time)
-    print("--- %s seconds ---" % (time_delta[0]))
-
-    utils.create_csv(
-        time_delta,
-        output_folder + "total_run_time",
-        "Total run time (s)",
-    )
