@@ -39,7 +39,7 @@ def create_missing(data, miss_rate: float, name: str, header):
     create_csv(missing_data, name, header)
 
 
-def create_output(data, path: str, override: bool):
+def create_output(data, path: str, override: int):
 
     if override == 1:
         df = pd.DataFrame(data)
