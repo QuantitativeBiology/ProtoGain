@@ -18,6 +18,7 @@ class Params:
         lr_D=0.001,
         lr_G=0.001,
         num_runs=1,
+        override=0,
     ):
         self.input = input
         self.output = output
@@ -32,6 +33,7 @@ class Params:
         self.lr_D = lr_D
         self.lr_G = lr_G
         self.num_runs = num_runs
+        self.override = override
 
     @staticmethod
     def read_json(json_file):
@@ -59,6 +61,7 @@ class Params:
         lr_D = params["lr_D"]
         lr_G = params["lr_G"]
         num_runs = params["num_runs"]
+        override = params["override"]
 
         return cls(
             input,
@@ -74,4 +77,5 @@ class Params:
             lr_D,
             lr_G,
             num_runs,
+            override,
         )
