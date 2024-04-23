@@ -47,6 +47,63 @@ def init_arg():
     return parser.parse_args()
 
 
+def output(
+    data_train_imputed,
+    output_folder,
+    output_file,
+    missing_header,
+    loss_D_values,
+    loss_G_values,
+    loss_MSE_train,
+    loss_MSE_test,
+    cpu,
+    ram,
+    ram_percentage,
+    override,
+):
+
+    utils.create_csv(
+        data_train_imputed,
+        output_folder + output_file,
+        missing_header,
+    )
+    utils.create_output(
+        loss_D_values,
+        output_folder + "lossD.csv",
+        override,
+    )
+    utils.create_output(
+        loss_G_values,
+        output_folder + "lossG.csv",
+        override,
+    )
+    utils.create_output(
+        loss_MSE_train,
+        output_folder + "lossMSE_train.csv",
+        override,
+    )
+
+    utils.create_output(
+        loss_MSE_test,
+        output_folder + "lossMSE_test.csv",
+        override,
+    )
+
+    utils.create_output(
+        cpu,
+        output_folder + "cpu.csv",
+        override,
+    )
+
+    utils.create_output(ram, output_folder + "ram.csv", override)
+
+    utils.create_output(
+        ram_percentage,
+        output_folder + "ram_percentage.csv",
+        override,
+    )
+
+
 def generate_mask(data, miss_rate):
     dim = data.shape[1]
     size = data.shape[0]
@@ -137,8 +194,6 @@ def train_v2(
     num_iterations,
     batch_size,
     train_size,
-    data_iter,
-    ref,
     missing,
     mask,
     combined_dataset_train,
@@ -151,7 +206,6 @@ def train_v2(
     ram_percentage = []
 
     dim = missing.shape[1]
-    size = missing.shape[0]
 
     # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
     loss = nn.BCELoss(reduction="none")
@@ -172,13 +226,11 @@ def train_v2(
     # for w in net_G.parameters():
     #    nn.init.xavier_normal_(w)
 
-    # Initialize weights for net_D
     for name, param in net_D.named_parameters():
         if "weight" in name:
             nn.init.xavier_normal_(param)
             # nn.init.uniform_(param)
 
-    # Initialize weights for net_G
     for name, param in net_G.named_parameters():
         if "weight" in name:
             nn.init.xavier_normal_(param)
@@ -218,7 +270,6 @@ def train_v2(
         if it % 100 == 0:
             s = f"{it}: loss D={loss_D.detach().numpy(): .3f}  loss G={loss_G.detach().numpy(): .3f}  rmse train={np.sqrt(loss_MSE_train[it]): .4f}  rmse test={np.sqrt(loss_MSE_test[it]): .3f}"
             pbar.clear()
-            # logger.info('{}'.format(s))
             pbar.set_description(s)
 
         cpu.append(psutil.cpu_percent())
@@ -228,50 +279,22 @@ def train_v2(
         loss_D_values[it] = loss_D.detach().numpy()
         loss_G_values[it] = loss_G.detach().numpy()
 
-        # print("Data:\n", data, scaler.inverse_transform(data), "\nImputed:\n", fake_X, scaler.inverse_transform(fake_X.detach().numpy()))
-
     sample_G = generate_sample(missing, mask)
     data_train_imputed = missing * mask + sample_G * (1 - mask)
     data_train_imputed = scaler.inverse_transform(data_train_imputed.detach().numpy())
 
-    utils.create_csv(
+    output(
         data_train_imputed,
-        output_folder + output_file,
+        output_folder,
+        output_file,
         missing_header,
-    )
-    utils.create_output(
         loss_D_values,
-        output_folder + "lossD.csv",
-        override,
-    )
-    utils.create_output(
         loss_G_values,
-        output_folder + "lossG.csv",
-        override,
-    )
-    utils.create_output(
         loss_MSE_train,
-        output_folder + "lossMSE_train.csv",
-        override,
-    )
-
-    utils.create_output(
         loss_MSE_test,
-        output_folder + "lossMSE_test.csv",
-        override,
-    )
-
-    utils.create_output(
         cpu,
-        output_folder + "cpu.csv",
-        override,
-    )
-
-    utils.create_output(ram, output_folder + "ram.csv", override)
-
-    utils.create_output(
+        ram,
         ram_percentage,
-        output_folder + "ram_percentage.csv",
         override,
     )
 
