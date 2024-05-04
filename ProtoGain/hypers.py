@@ -5,10 +5,10 @@ class Params:
 
     def __init__(
         self,
-        input,
-        output,
-        ref,
-        output_folder,
+        input=None,
+        output=None,
+        ref=None,
+        output_folder=None,
         num_iterations=2000,
         batch_size=128,
         alpha=0.2,
@@ -36,7 +36,7 @@ class Params:
         self.override = override
 
     @staticmethod
-    def read_json(json_file):
+    def _read_json(json_file):
         with open(json_file, "r") as f:
             params = json.load(f)
         return params
@@ -44,7 +44,7 @@ class Params:
     @classmethod
     def read_hyperparameters(cls, params_json=None):
 
-        params = cls.read_json(params_json)
+        params = cls._read_json(params_json)
 
         print(params)
 
@@ -60,7 +60,7 @@ class Params:
         train_ratio = params["train_ratio"]
         lr_D = params["lr_D"]
         lr_G = params["lr_G"]
-        num_runs = params["num_runs"]
+        num_iterations = params["num_iterations"]
         override = params["override"]
 
         return cls(
@@ -76,6 +76,11 @@ class Params:
             train_ratio,
             lr_D,
             lr_G,
-            num_runs,
+            num_iterations,
             override,
         )
+
+    def update_hyperparameters(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)

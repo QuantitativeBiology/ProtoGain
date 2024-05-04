@@ -55,3 +55,66 @@ def create_output(data, path: str, override: int):
         else:
             df = pd.DataFrame(data)
             df.to_csv(path, index=False)
+
+
+def output(
+    data_train_imputed,
+    output_folder,
+    output_file,
+    missing_header,
+    loss_D_values,
+    loss_G_values,
+    loss_MSE_train,
+    loss_MSE_test,
+    cpu,
+    ram,
+    ram_percentage,
+    override,
+):
+
+    create_csv(
+        data_train_imputed,
+        output_folder + output_file,
+        missing_header,
+    )
+    create_output(
+        loss_D_values,
+        output_folder + "lossD.csv",
+        override,
+    )
+    create_output(
+        loss_G_values,
+        output_folder + "lossG.csv",
+        override,
+    )
+    create_output(
+        loss_MSE_train,
+        output_folder + "lossMSE_train.csv",
+        override,
+    )
+
+    create_output(
+        loss_MSE_test,
+        output_folder + "lossMSE_test.csv",
+        override,
+    )
+
+    create_output(
+        cpu,
+        output_folder + "cpu.csv",
+        override,
+    )
+
+    create_output(ram, output_folder + "ram.csv", override)
+
+    create_output(
+        ram_percentage,
+        output_folder + "ram_percentage.csv",
+        override,
+    )
+
+
+def sample_idx(m, n):
+    A = np.random.permutation(m)
+    idx = A[:n]
+    return idx
