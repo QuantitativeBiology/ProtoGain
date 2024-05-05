@@ -1,6 +1,7 @@
 from hypers import Params
 from model import Network
 from dataset import Data
+from output import Metrics
 import utils
 
 import torch
@@ -150,8 +151,10 @@ if __name__ == "__main__":
             nn.Sigmoid(),
         )
 
-        model = Network(hypers=params, net_G=net_G, net_D=net_D)
-        model.train_v2(data, missing_header, ref_scaled)
+        metrics = Metrics(params)
+        model = Network(hypers=params, net_G=net_G, net_D=net_D, metrics=metrics)
+
+        model.train(data, missing_header, ref_scaled)
 
         run_time = []
         run_time.append(time.time() - start_time)

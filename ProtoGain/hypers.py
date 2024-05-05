@@ -60,7 +60,7 @@ class Params:
         train_ratio = params["train_ratio"]
         lr_D = params["lr_D"]
         lr_G = params["lr_G"]
-        num_iterations = params["num_iterations"]
+        num_runs = params["num_runs"]
         override = params["override"]
 
         return cls(
@@ -76,11 +76,13 @@ class Params:
             train_ratio,
             lr_D,
             lr_G,
-            num_iterations,
+            num_runs,
             override,
         )
 
-    def update_hyperparameters(self, **kwargs):
+    def update_hypers(self, **kwargs):
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+            else:
+                print(f"{key} is not a valid parameter")
