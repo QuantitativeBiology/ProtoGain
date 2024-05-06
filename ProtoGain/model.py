@@ -65,6 +65,25 @@ class Network:
             data_imputed_scaled.detach().numpy()
         )
 
+    def _evaluate_impute(cls, data: Data):
+        sample_G = cls.generate_sample(data.ref_dataset_scaled, data.ref_mask)
+        data_imputed_scaled = data.ref_dataset_scaled * data.ref_mask + sample_G * (
+            1 - data.ref_mask
+        )
+        cls.metrics.ref_data_imputed = data.scaler.inverse_transform(
+            data_imputed_scaled.detach().numpy()
+        )
+
+        test_idx = torch.nonzero((data.mask - data.ref_mask) == 1)
+
+        ref_imputed = []
+        for id in test_idx:
+            ref_imputed.append(
+                tuple(data.dataset[tuple(id)], data.ref_dataset[tuple(id)])
+            )
+
+        utils.create_output(ref_imputed, f"{cls.hypers.output_folder}test_imputed", 1)
+
     def _update_G(cls, batch, mask, hint, Z, loss):
         loss_mse = nn.MSELoss(reduction="none")
 
@@ -112,7 +131,7 @@ class Network:
 
         return loss_D
 
-    def train(cls, data: Data, missing_header, ref_scaled):
+    def train(cls, data: Data, missing_header):
 
         dim = data.dataset_scaled.shape[1]
         train_size = data.dataset_scaled.shape[0]
@@ -129,7 +148,7 @@ class Network:
             batch = data.dataset_scaled[mb_idx]
             mask_batch = data.mask[mb_idx]
             hint_batch = data.hint[mb_idx]
-            ref_batch = ref_scaled[mb_idx]
+            ref_batch = data.ref_dataset_scaled[mb_idx]
 
             Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
             cls.metrics.loss_D[it] = cls._update_D(
@@ -162,6 +181,73 @@ class Network:
 
         utils.output(
             cls.metrics.data_imputed,
+            cls.hypers.output_folder,
+            cls.hypers.output,
+            missing_header,
+            cls.metrics.loss_D,
+            cls.metrics.loss_G,
+            cls.metrics.loss_MSE_train,
+            cls.metrics.loss_MSE_test,
+            cls.metrics.cpu,
+            cls.metrics.ram,
+            cls.metrics.ram_percentage,
+            cls.hypers.override,
+        )
+
+    def evaluate(cls, data: Data, missing_header):
+
+        dim = data.ref_dataset_scaled.shape[1]
+        train_size = data.ref_dataset_scaled.shape[0]
+
+        # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
+        loss = nn.BCELoss(reduction="none")
+        loss_mse = nn.MSELoss(reduction="none")
+
+        pbar = tqdm(range(cls.hypers.num_iterations))
+        for it in pbar:
+
+            mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
+
+            train_batch = data.ref_dataset_scaled[mb_idx]
+            train_mask_batch = data.ref_mask[mb_idx]
+            train_hint_batch = data.ref_hint[mb_idx]
+            test_batch = data.dataset_scaled[mb_idx]
+            test_mask_batch = data.mask[mb_idx]
+
+            Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
+            cls.metrics.loss_D[it] = cls._update_D(
+                train_batch, train_mask_batch, train_hint_batch, Z, loss
+            )
+            cls.metrics.loss_G[it] = cls._update_G(
+                train_batch, train_mask_batch, train_hint_batch, Z, loss
+            )
+
+            sample_G = cls.generate_sample(train_batch, train_mask_batch)
+
+            cls.metrics.loss_MSE_train[it] = (
+                loss_mse(train_mask_batch * train_batch, train_mask_batch * sample_G)
+            ).mean()
+
+            cls.metrics.loss_MSE_test[it] = (
+                loss_mse(
+                    (test_mask_batch - train_mask_batch) * test_batch,
+                    (test_mask_batch - train_mask_batch) * sample_G,
+                )
+            ).mean() / (test_mask_batch - train_mask_batch).mean()
+
+            if it % 100 == 0:
+                s = f"{it}: loss D={cls.metrics.loss_D[it]: .3f}  loss G={cls.metrics.loss_G[it]: .3f}  rmse train={np.sqrt(cls.metrics.loss_MSE_train[it]): .4f}  rmse test={np.sqrt(cls.metrics.loss_MSE_test[it]): .3f}"
+                pbar.clear()
+                pbar.set_description(s)
+
+            cls.metrics.cpu[it] = psutil.cpu_percent()
+            cls.metrics.ram[it] = psutil.virtual_memory()[3] / 1000000000
+            cls.metrics.ram_percentage[it] = psutil.virtual_memory()[2]
+
+        cls._evaluate_impute(data)
+
+        utils.output(
+            cls.metrics.ref_data_imputed,
             cls.hypers.output_folder,
             cls.hypers.output,
             missing_header,

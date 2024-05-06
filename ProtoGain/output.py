@@ -12,3 +12,4 @@ class Metrics:
         self.ram = np.zeros(hypers.num_iterations)
         self.ram_percentage = np.zeros(hypers.num_iterations)
         self.data_imputed = None
+        self.ref_data_imputed = None

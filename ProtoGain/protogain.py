@@ -107,28 +107,8 @@ if __name__ == "__main__":
         missing = df_missing.values
         missing_header = df_missing.columns.tolist()
 
-        df_ref = pd.read_csv(ref_file)
-        ref = df_ref.values
-        ref_header = df_ref.columns.tolist()
-
         dim = missing.shape[1]
         train_size = missing.shape[0]
-
-        if dim != ref.shape[1]:
-            print(
-                "\n\nThe reference and data files provided don't have the same number of features\n"
-            )
-            exit(1)
-        elif train_size != ref.shape[0]:
-            print(
-                "\n\nThe reference and data files provided don't have the same number of samples\n"
-            )
-            exit(2)
-
-        data = Data(missing, hint_rate)
-
-        ref_scaled = data.scaler.transform(ref)
-        ref_scaled = torch.from_numpy(ref_scaled)
 
         h_dim1 = dim
         h_dim2 = dim
@@ -154,7 +134,34 @@ if __name__ == "__main__":
         metrics = Metrics(params)
         model = Network(hypers=params, net_G=net_G, net_D=net_D, metrics=metrics)
 
-        model.train(data, missing_header, ref_scaled)
+        if ref_file is not None:
+            df_ref = pd.read_csv(ref_file)
+            ref = df_ref.values
+            ref_header = df_ref.columns.tolist()
+
+            if dim != ref.shape[1]:
+                print(
+                    "\n\nThe reference and data files provided don't have the same number of features\n"
+                )
+                exit(1)
+            elif train_size != ref.shape[0]:
+                print(
+                    "\n\nThe reference and data files provided don't have the same number of samples\n"
+                )
+                exit(2)
+
+            data = Data(missing, hint_rate, ref)
+            model.train(data, missing_header)
+
+        else:
+            data = Data(missing, hint_rate)
+            model.evaluate()
+
+        # metrics = Metrics(params)
+        # model = Network(hypers=params, net_G=net_G, net_D=net_D, metrics=metrics)
+
+        # model.train(data, missing_header)
+        # model.train(data, missing_header, ref_scaled)
 
         run_time = []
         run_time.append(time.time() - start_time)
