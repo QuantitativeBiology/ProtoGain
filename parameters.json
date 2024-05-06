@@ -1,5 +1,8 @@
 {
-    "num_epochs": 2000,
+    "input": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/breastMissing_20.csv",
+    "output": "breastImputed_20",
+    "ref": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/breast.csv", 
+    "num_iterations": 2000,
     "batch_size": 128, 
     "alpha": 10, 
     "miss_rate": 0.2, 

@@ -512,14 +512,14 @@ if __name__ == "__main__":
         #     3600,
         #     2400,
         # ]
-        # test_samples = 6000  # credit size
+        test_samples = 6000  # credit size
 
         args = init_arg()
 
         run = args.run
         samples = args.samples
 
-        dataset = "breast"
+        dataset = "credit"
         folder = "/home/leandrosobral/LeandroSobralThesis/" + dataset + "/"
 
         params = Params.read_hyperparameters("parameters.json")

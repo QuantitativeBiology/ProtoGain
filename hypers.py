@@ -5,7 +5,10 @@ class Params:
 
     def __init__(
         self,
-        num_epochs=2000,
+        input,
+        output,
+        ref,
+        num_iterations=2000,
         batch_size=128,
         alpha=0.2,
         miss_rate=0.2,
@@ -15,8 +18,10 @@ class Params:
         lr_G=0.001,
         num_runs=1,
     ):
-
-        self.num_epochs = num_epochs
+        self.input = input
+        self.output = output
+        self.ref = ref
+        self.num_iterations = num_iterations
         self.batch_size = batch_size
         self.alpha = alpha
         self.miss_rate = miss_rate
@@ -39,7 +44,10 @@ class Params:
 
         print(params)
 
-        num_epochs = params["num_epochs"]
+        input = params["input"]
+        output = params["output"]
+        ref = params["ref"]
+        num_iterations = params["num_iterations"]
         batch_size = params["batch_size"]
         alpha = params["alpha"]
         miss_rate = params["miss_rate"]
@@ -50,7 +58,10 @@ class Params:
         num_runs = params["num_runs"]
 
         return cls(
-            num_epochs,
+            input,
+            output,
+            ref,
+            num_iterations,
             batch_size,
             alpha,
             miss_rate,
