@@ -12,7 +12,6 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 
 import optuna
-import numpy as np
 
 import time
 import cProfile
@@ -151,11 +150,12 @@ if __name__ == "__main__":
                 exit(2)
 
             data = Data(missing, hint_rate, ref)
-            model.train(data, missing_header)
+            model.train_ref(data, missing_header)
 
         else:
             data = Data(missing, hint_rate)
-            model.evaluate()
+            model.evaluate(data, missing_header)
+            model.train(data, missing_header)
 
         # metrics = Metrics(params)
         # model = Network(hypers=params, net_G=net_G, net_D=net_D, metrics=metrics)

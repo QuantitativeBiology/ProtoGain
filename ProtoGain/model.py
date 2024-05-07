@@ -76,13 +76,22 @@ class Network:
 
         test_idx = torch.nonzero((data.mask - data.ref_mask) == 1)
 
-        ref_imputed = []
-        for id in test_idx:
-            ref_imputed.append(
-                tuple(data.dataset[tuple(id)], data.ref_dataset[tuple(id)])
+        ref_imputed = np.empty((len(test_idx), 4))
+        for i, id in enumerate(test_idx):
+            ref_imputed[i] = np.array(
+                [
+                    data.dataset[tuple(id)],
+                    cls.metrics.ref_data_imputed[tuple(id)],
+                    id[0],
+                    id[1],
+                ]
             )
 
-        utils.create_output(ref_imputed, f"{cls.hypers.output_folder}test_imputed", 1)
+        utils.create_csv(
+            ref_imputed,
+            f"{cls.hypers.output_folder}test_imputed",
+            ["original", "imputed", "sample", "feature"],
+        )
 
     def _update_G(cls, batch, mask, hint, Z, loss):
         loss_mse = nn.MSELoss(reduction="none")
@@ -131,7 +140,7 @@ class Network:
 
         return loss_D
 
-    def train(cls, data: Data, missing_header):
+    def train_ref(cls, data: Data, missing_header):
 
         dim = data.dataset_scaled.shape[1]
         train_size = data.dataset_scaled.shape[0]
@@ -145,10 +154,10 @@ class Network:
 
             mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
 
-            batch = data.dataset_scaled[mb_idx]
-            mask_batch = data.mask[mb_idx]
-            hint_batch = data.hint[mb_idx]
-            ref_batch = data.ref_dataset_scaled[mb_idx]
+            batch = data.dataset_scaled[mb_idx].detach().clone()
+            mask_batch = data.mask[mb_idx].detach().clone()
+            hint_batch = data.hint[mb_idx].detach().clone()
+            ref_batch = data.ref_dataset_scaled[mb_idx].detach().clone()
 
             Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
             cls.metrics.loss_D[it] = cls._update_D(
@@ -208,23 +217,23 @@ class Network:
 
             mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
 
-            train_batch = data.ref_dataset_scaled[mb_idx]
-            train_mask_batch = data.ref_mask[mb_idx]
-            train_hint_batch = data.ref_hint[mb_idx]
-            test_batch = data.dataset_scaled[mb_idx]
-            test_mask_batch = data.mask[mb_idx]
+            train_batch = data.ref_dataset_scaled[mb_idx].detach().clone()
+            train_mask_batch = data.ref_mask[mb_idx].detach().clone()
+            train_hint_batch = data.ref_hint[mb_idx].detach().clone()
+            test_batch = data.dataset_scaled[mb_idx].detach().clone()
+            test_mask_batch = data.mask[mb_idx].detach().clone()
 
             Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
-            cls.metrics.loss_D[it] = cls._update_D(
+            cls.metrics.loss_D_evaluate[it] = cls._update_D(
                 train_batch, train_mask_batch, train_hint_batch, Z, loss
             )
-            cls.metrics.loss_G[it] = cls._update_G(
+            cls.metrics.loss_G_evaluate[it] = cls._update_G(
                 train_batch, train_mask_batch, train_hint_batch, Z, loss
             )
 
             sample_G = cls.generate_sample(train_batch, train_mask_batch)
 
-            cls.metrics.loss_MSE_train[it] = (
+            cls.metrics.loss_MSE_train_evaluate[it] = (
                 loss_mse(train_mask_batch * train_batch, train_mask_batch * sample_G)
             ).mean()
 
@@ -236,7 +245,78 @@ class Network:
             ).mean() / (test_mask_batch - train_mask_batch).mean()
 
             if it % 100 == 0:
-                s = f"{it}: loss D={cls.metrics.loss_D[it]: .3f}  loss G={cls.metrics.loss_G[it]: .3f}  rmse train={np.sqrt(cls.metrics.loss_MSE_train[it]): .4f}  rmse test={np.sqrt(cls.metrics.loss_MSE_test[it]): .3f}"
+                s = f"{it}: loss D={cls.metrics.loss_D_evaluate[it]: .3f}  loss G={cls.metrics.loss_G_evaluate[it]: .3f}  rmse train={np.sqrt(cls.metrics.loss_MSE_train_evaluate[it]): .4f}  rmse test={np.sqrt(cls.metrics.loss_MSE_test[it]): .3f}"
+                pbar.clear()
+                pbar.set_description(s)
+
+            cls.metrics.cpu_evaluate[it] = psutil.cpu_percent()
+            cls.metrics.ram_evaluate[it] = psutil.virtual_memory()[3] / 1000000000
+            cls.metrics.ram_percentage_evaluate[it] = psutil.virtual_memory()[2]
+
+        cls._evaluate_impute(data)
+
+        # utils.output(
+        #     cls.metrics.ref_data_imputed,
+        #     cls.hypers.output_folder,
+        #     cls.hypers.output,
+        #     missing_header,
+        #     cls.metrics.loss_D_evaluate,
+        #     cls.metrics.loss_G_evaluate,
+        #     cls.metrics.loss_MSE_train_evaluate,
+        #     cls.metrics.loss_MSE_test,
+        #     cls.metrics.cpu_evaluate,
+        #     cls.metrics.ram_evaluate,
+        #     cls.metrics.ram_percentage_evaluate,
+        #     cls.hypers.override,
+        # )
+
+    def train(cls, data: Data, missing_header):
+
+        for name, param in cls.net_D.named_parameters():
+            if "weight" in name:
+                nn.init.xavier_normal_(param)
+                # nn.init.uniform_(param)
+
+        for name, param in cls.net_G.named_parameters():
+            if "weight" in name:
+                nn.init.xavier_normal_(param)
+                # nn.init.uniform_(param)
+
+        cls.optimizer_D = torch.optim.Adam(cls.net_D.parameters(), lr=cls.hypers.lr_D)
+        cls.optimizer_G = torch.optim.Adam(cls.net_G.parameters(), lr=cls.hypers.lr_G)
+
+        dim = data.dataset_scaled.shape[1]
+        train_size = data.dataset_scaled.shape[0]
+
+        # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
+        loss = nn.BCELoss(reduction="none")
+        loss_mse = nn.MSELoss(reduction="none")
+
+        pbar = tqdm(range(cls.hypers.num_iterations))
+        for it in pbar:
+
+            mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
+
+            batch = data.dataset_scaled[mb_idx].detach().clone()
+            mask_batch = data.mask[mb_idx].detach().clone()
+            hint_batch = data.hint[mb_idx].detach().clone()
+
+            Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
+            cls.metrics.loss_D[it] = cls._update_D(
+                batch, mask_batch, hint_batch, Z, loss
+            )
+            cls.metrics.loss_G[it] = cls._update_G(
+                batch, mask_batch, hint_batch, Z, loss
+            )
+
+            sample_G = cls.generate_sample(batch, mask_batch)
+
+            cls.metrics.loss_MSE_train[it] = (
+                loss_mse(mask_batch * batch, mask_batch * sample_G)
+            ).mean()
+
+            if it % 100 == 0:
+                s = f"{it}: loss D={cls.metrics.loss_D[it]: .3f}  loss G={cls.metrics.loss_G[it]: .3f}  rmse train={np.sqrt(cls.metrics.loss_MSE_train[it]): .4f}"
                 pbar.clear()
                 pbar.set_description(s)
 
@@ -244,19 +324,19 @@ class Network:
             cls.metrics.ram[it] = psutil.virtual_memory()[3] / 1000000000
             cls.metrics.ram_percentage[it] = psutil.virtual_memory()[2]
 
-        cls._evaluate_impute(data)
+        cls.impute(data)
 
-        utils.output(
-            cls.metrics.ref_data_imputed,
-            cls.hypers.output_folder,
-            cls.hypers.output,
-            missing_header,
-            cls.metrics.loss_D,
-            cls.metrics.loss_G,
-            cls.metrics.loss_MSE_train,
-            cls.metrics.loss_MSE_test,
-            cls.metrics.cpu,
-            cls.metrics.ram,
-            cls.metrics.ram_percentage,
-            cls.hypers.override,
-        )
+        # utils.output(
+        #     cls.metrics.data_imputed,
+        #     cls.hypers.output_folder,
+        #     cls.hypers.output,
+        #     missing_header,
+        #     cls.metrics.loss_D,
+        #     cls.metrics.loss_G,
+        #     cls.metrics.loss_MSE_train,
+        #     cls.metrics.loss_MSE_test,
+        #     cls.metrics.cpu,
+        #     cls.metrics.ram,
+        #     cls.metrics.ram_percentage,
+        #     cls.hypers.override,
+        # )

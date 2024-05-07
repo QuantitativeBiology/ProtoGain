@@ -35,15 +35,14 @@ class Data:
 
     def _create_ref(cls, miss_rate, hint_rate):
 
-        cls.ref_mask = cls.mask
-        cls.ref_dataset = cls.dataset
+        cls.ref_mask = cls.mask.detach().clone()
+        cls.ref_dataset = cls.dataset.detach().clone()
         zero_idxs = torch.nonzero(cls.mask == 1)
         chance = torch.rand(len(zero_idxs))
         miss = chance > miss_rate
 
-        selected_idxs = zero_idxs[~miss]
-
-        for idx in selected_idxs:
+        selected_idx = zero_idxs[~miss]
+        for idx in selected_idx:
             cls.ref_mask[tuple(idx)] = 0
             cls.ref_dataset[tuple(idx)] = 0
 
