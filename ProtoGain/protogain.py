@@ -32,6 +32,7 @@ def init_arg():
     parser.add_argument("--it", type=int, default=2000, help="number of iterations")
     parser.add_argument("--batchsize", type=int, default=128, help="batch size")
     parser.add_argument("--alpha", type=float, default=10, help="alpha")
+    parser.add_argument("--miss", type=float, default=0.2, help="missing rate")
     parser.add_argument("--hint", type=float, default=0.8, help="hint rate")
     parser.add_argument(
         "--trainratio", help="percentage of data to be used as a train set"
@@ -64,6 +65,7 @@ if __name__ == "__main__":
         num_iterations = args.it
         batch_size = args.batchsize
         alpha = args.alpha
+        miss_rate = args.miss
         hint_rate = args.hint
         train_ratio = args.trainratio
         lr_D = args.lrd
@@ -80,6 +82,7 @@ if __name__ == "__main__":
             num_iterations = params.num_iterations
             batch_size = params.batch_size
             alpha = params.alpha
+            miss_rate = params.miss_rate
             hint_rate = params.hint_rate
             train_ration = params.train_ratio
             lr_D = params.lr_D
@@ -95,6 +98,7 @@ if __name__ == "__main__":
                 num_iterations,
                 batch_size,
                 alpha,
+                miss_rate,
                 hint_rate,
                 train_ratio,
                 lr_D,
@@ -102,9 +106,20 @@ if __name__ == "__main__":
                 override,
             )
 
-        df_missing = pd.read_csv(missing_file)
-        missing = df_missing.values
-        missing_header = df_missing.columns.tolist()
+        if missing_file is None:
+            print("Input file not provided")
+            exit(1)
+        if missing_file.endswith(".csv"):
+            df_missing = pd.read_csv(missing_file)
+            missing = df_missing.values
+            missing_header = df_missing.columns.tolist()
+        elif missing_file.endswith(".tsv"):
+            df_missing = utils.build_protein_matrix(missing_file)
+            missing = df_missing.values
+            missing_header = df_missing.columns.tolist()
+        else:
+            print("Invalid file format")
+            exit(2)
 
         dim = missing.shape[1]
         train_size = missing.shape[0]
@@ -142,12 +157,12 @@ if __name__ == "__main__":
                 print(
                     "\n\nThe reference and data files provided don't have the same number of features\n"
                 )
-                exit(1)
+                exit(3.1)
             elif train_size != ref.shape[0]:
                 print(
                     "\n\nThe reference and data files provided don't have the same number of samples\n"
                 )
-                exit(2)
+                exit(3.2)
 
             data = Data(missing, hint_rate, ref)
             model.train_ref(data, missing_header)

@@ -1,4 +1,5 @@
 import json
+import os
 
 
 class Params:
@@ -6,9 +7,9 @@ class Params:
     def __init__(
         self,
         input=None,
-        output=None,
+        output="imputed",
         ref=None,
-        output_folder=None,
+        output_folder=f"{os.getcwd()}/results/",
         num_iterations=2000,
         batch_size=128,
         alpha=0.2,
@@ -17,7 +18,6 @@ class Params:
         train_ratio=0.8,
         lr_D=0.001,
         lr_G=0.001,
-        num_runs=1,
         override=0,
     ):
         self.input = input
@@ -32,7 +32,6 @@ class Params:
         self.train_ratio = train_ratio
         self.lr_D = lr_D
         self.lr_G = lr_G
-        self.num_runs = num_runs
         self.override = override
 
     @staticmethod
@@ -60,7 +59,6 @@ class Params:
         train_ratio = params["train_ratio"]
         lr_D = params["lr_D"]
         lr_G = params["lr_G"]
-        num_runs = params["num_runs"]
         override = params["override"]
 
         return cls(
@@ -76,7 +74,6 @@ class Params:
             train_ratio,
             lr_D,
             lr_G,
-            num_runs,
             override,
         )
 

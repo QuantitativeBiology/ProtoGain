@@ -254,7 +254,6 @@ class Network:
             cls.metrics.ram_percentage_evaluate[it] = psutil.virtual_memory()[2]
 
         cls._evaluate_impute(data)
-
         # utils.output(
         #     cls.metrics.ref_data_imputed,
         #     cls.hypers.output_folder,
