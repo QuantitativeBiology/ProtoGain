@@ -1,19 +1,18 @@
 import torch
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 
 class Data:
-    def __init__(self, dataset, hint_rate, ref=None):
+    def __init__(self, dataset, miss_rate, hint_rate, ref=None):
+
+        self.scaler = StandardScaler()
+        dataset_scaled = self.scaler.fit_transform(dataset)
 
         mask = np.where(np.isnan(dataset), 0.0, 1.0)
         dataset = np.where(mask, dataset, 0.0)
+        dataset_scaled = np.where(mask, dataset_scaled, 0.0)
         hint = generate_hint(mask, hint_rate)
-
-        range_scaler = (0, 1)
-
-        self.scaler = MinMaxScaler(feature_range=range_scaler)
-        dataset_scaled = self.scaler.fit_transform(dataset)
 
         self.dataset = torch.from_numpy(dataset)
         self.mask = torch.from_numpy(mask)
@@ -31,7 +30,11 @@ class Data:
             self.ref_hint = torch.from_numpy(ref_hint)
             self.ref_dataset_scaled = torch.from_numpy(ref_dataset_scaled)
         else:
-            self._create_ref(0.1, hint_rate)
+            self._create_ref(miss_rate, hint_rate)
+
+        print("\nNumber of samples:", self.dataset.shape[0])
+        print("Number of features:", self.dataset.shape[1])
+        print("Missing Rate (%):", (1.0 - self.mask.mean().item()) * 100.0)
 
     def _create_ref(cls, miss_rate, hint_rate):
 

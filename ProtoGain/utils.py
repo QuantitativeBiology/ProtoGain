@@ -118,3 +118,24 @@ def sample_idx(m, n):
     A = np.random.permutation(m)
     idx = A[:n]
     return idx
+
+
+def build_protein_matrix(tsv_file):
+
+    data = pd.read_csv(
+        tsv_file,
+        sep="\t",
+        lineterminator="\n",
+        skiprows=(10),
+        header=(0),
+        usecols=(0, 1, 4),
+    )
+
+    # matrix = data.pivot(index="sample_accession", columns="protein", values="ribaq")
+    matrix = data.pivot(index="protein", columns="sample_accession", values="ribaq")
+
+    # print("Number of samples", matrix.shape[0])
+    # print("Number of features", matrix.shape[1])
+    # print("Missing Rate (%)", matrix.isna().sum().sum() / matrix.size * 100)
+
+    return matrix

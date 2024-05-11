@@ -131,9 +131,7 @@ class Network:
         fake_X = new_X * mask + sample_G * (1 - mask)
         fake_input_D = torch.cat((fake_X.detach(), hint), 1).float()
         fake_Y = cls.net_D(fake_input_D)
-
         loss_D = (loss(fake_Y.float(), mask.float())).mean()
-
         cls.optimizer_D.zero_grad()
         loss_D.backward()
         cls.optimizer_D.step()
@@ -144,6 +142,12 @@ class Network:
 
         dim = data.dataset_scaled.shape[1]
         train_size = data.dataset_scaled.shape[0]
+
+        if train_size < cls.hypers.batch_size:
+            cls.hypers.batch_size = train_size
+            print(
+                "Batch size is larger than the number of samples\nReducing batch size to the number of samples\n"
+            )
 
         # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
         loss = nn.BCELoss(reduction="none")
@@ -188,25 +192,32 @@ class Network:
 
         cls.impute(data)
 
-        utils.output(
-            cls.metrics.data_imputed,
-            cls.hypers.output_folder,
-            cls.hypers.output,
-            missing_header,
-            cls.metrics.loss_D,
-            cls.metrics.loss_G,
-            cls.metrics.loss_MSE_train,
-            cls.metrics.loss_MSE_test,
-            cls.metrics.cpu,
-            cls.metrics.ram,
-            cls.metrics.ram_percentage,
-            cls.hypers.override,
-        )
+        if cls.hypers.output_all == 1:
+            utils.output(
+                cls.metrics.data_imputed,
+                cls.hypers.output_folder,
+                cls.hypers.output,
+                missing_header,
+                cls.metrics.loss_D,
+                cls.metrics.loss_G,
+                cls.metrics.loss_MSE_train,
+                cls.metrics.loss_MSE_test,
+                cls.metrics.cpu,
+                cls.metrics.ram,
+                cls.metrics.ram_percentage,
+                cls.hypers.override,
+            )
 
     def evaluate(cls, data: Data, missing_header):
 
         dim = data.ref_dataset_scaled.shape[1]
         train_size = data.ref_dataset_scaled.shape[0]
+
+        if train_size < cls.hypers.batch_size:
+            cls.hypers.batch_size = train_size
+            print(
+                "\nBatch size is larger than the number of samples\nReducing batch size to the number of samples\n"
+            )
 
         # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
         loss = nn.BCELoss(reduction="none")
@@ -214,7 +225,6 @@ class Network:
 
         pbar = tqdm(range(cls.hypers.num_iterations))
         for it in pbar:
-
             mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
 
             train_batch = data.ref_dataset_scaled[mb_idx].detach().clone()
@@ -222,7 +232,6 @@ class Network:
             train_hint_batch = data.ref_hint[mb_idx].detach().clone()
             test_batch = data.dataset_scaled[mb_idx].detach().clone()
             test_mask_batch = data.mask[mb_idx].detach().clone()
-
             Z = torch.rand((cls.hypers.batch_size, dim)) * 0.01
             cls.metrics.loss_D_evaluate[it] = cls._update_D(
                 train_batch, train_mask_batch, train_hint_batch, Z, loss
@@ -230,7 +239,6 @@ class Network:
             cls.metrics.loss_G_evaluate[it] = cls._update_G(
                 train_batch, train_mask_batch, train_hint_batch, Z, loss
             )
-
             sample_G = cls.generate_sample(train_batch, train_mask_batch)
 
             cls.metrics.loss_MSE_train_evaluate[it] = (
@@ -254,20 +262,22 @@ class Network:
             cls.metrics.ram_percentage_evaluate[it] = psutil.virtual_memory()[2]
 
         cls._evaluate_impute(data)
-        # utils.output(
-        #     cls.metrics.ref_data_imputed,
-        #     cls.hypers.output_folder,
-        #     cls.hypers.output,
-        #     missing_header,
-        #     cls.metrics.loss_D_evaluate,
-        #     cls.metrics.loss_G_evaluate,
-        #     cls.metrics.loss_MSE_train_evaluate,
-        #     cls.metrics.loss_MSE_test,
-        #     cls.metrics.cpu_evaluate,
-        #     cls.metrics.ram_evaluate,
-        #     cls.metrics.ram_percentage_evaluate,
-        #     cls.hypers.override,
-        # )
+
+        if cls.hypers.output_all == 1:
+            utils.output(
+                cls.metrics.ref_data_imputed,
+                cls.hypers.output_folder,
+                cls.hypers.output,
+                missing_header,
+                cls.metrics.loss_D_evaluate,
+                cls.metrics.loss_G_evaluate,
+                cls.metrics.loss_MSE_train_evaluate,
+                cls.metrics.loss_MSE_test,
+                cls.metrics.cpu_evaluate,
+                cls.metrics.ram_evaluate,
+                cls.metrics.ram_percentage_evaluate,
+                cls.hypers.override,
+            )
 
     def train(cls, data: Data, missing_header):
 
@@ -286,6 +296,12 @@ class Network:
 
         dim = data.dataset_scaled.shape[1]
         train_size = data.dataset_scaled.shape[0]
+
+        if train_size < cls.hypers.batch_size:
+            cls.hypers.batch_size = train_size
+            print(
+                "\nBatch size is larger than the number of samples\nReducing batch size to the number of samples\n"
+            )
 
         # loss = nn.BCEWithLogitsLoss(reduction = 'sum')
         loss = nn.BCELoss(reduction="none")
@@ -325,17 +341,18 @@ class Network:
 
         cls.impute(data)
 
-        # utils.output(
-        #     cls.metrics.data_imputed,
-        #     cls.hypers.output_folder,
-        #     cls.hypers.output,
-        #     missing_header,
-        #     cls.metrics.loss_D,
-        #     cls.metrics.loss_G,
-        #     cls.metrics.loss_MSE_train,
-        #     cls.metrics.loss_MSE_test,
-        #     cls.metrics.cpu,
-        #     cls.metrics.ram,
-        #     cls.metrics.ram_percentage,
-        #     cls.hypers.override,
-        # )
+        if cls.hypers.output_all == 1:
+            utils.output(
+                cls.metrics.data_imputed,
+                cls.hypers.output_folder,
+                cls.hypers.output,
+                missing_header,
+                cls.metrics.loss_D,
+                cls.metrics.loss_G,
+                cls.metrics.loss_MSE_train,
+                cls.metrics.loss_MSE_test,
+                cls.metrics.cpu,
+                cls.metrics.ram,
+                cls.metrics.ram_percentage,
+                cls.hypers.override,
+            )

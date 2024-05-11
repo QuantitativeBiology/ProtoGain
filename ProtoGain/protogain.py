@@ -47,6 +47,7 @@ def init_arg():
     parser.add_argument(
         "--override", type=int, default=0, help="override previous files"
     )
+    parser.add_argument("--outall", type=int, default=0, help="output all files")
     return parser.parse_args()
 
 
@@ -72,6 +73,7 @@ if __name__ == "__main__":
         lr_G = args.lrg
         parameters_file = args.parameters
         override = args.override
+        output_all = args.outall
 
         if parameters_file is not None:
             params = Params.read_hyperparameters(parameters_file)
@@ -88,6 +90,7 @@ if __name__ == "__main__":
             lr_D = params.lr_D
             lr_G = params.lr_G
             override = params.override
+            output_all = params.output_all
 
         else:
             params = Params(
@@ -104,6 +107,7 @@ if __name__ == "__main__":
                 lr_D,
                 lr_G,
                 override,
+                output_all,
             )
 
         if missing_file is None:
@@ -164,19 +168,13 @@ if __name__ == "__main__":
                 )
                 exit(3.2)
 
-            data = Data(missing, hint_rate, ref)
+            data = Data(missing, miss_rate, hint_rate, ref)
             model.train_ref(data, missing_header)
 
         else:
-            data = Data(missing, hint_rate)
+            data = Data(missing, miss_rate, hint_rate)
             model.evaluate(data, missing_header)
             model.train(data, missing_header)
-
-        # metrics = Metrics(params)
-        # model = Network(hypers=params, net_G=net_G, net_D=net_D, metrics=metrics)
-
-        # model.train(data, missing_header)
-        # model.train(data, missing_header, ref_scaled)
 
         run_time = []
         run_time.append(time.time() - start_time)
