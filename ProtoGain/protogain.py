@@ -93,6 +93,7 @@ if __name__ == "__main__":
                 output_file,
                 ref_file,
                 output_folder,
+                None,
                 num_iterations,
                 batch_size,
                 alpha,
