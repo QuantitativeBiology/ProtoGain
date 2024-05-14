@@ -1,8 +1,8 @@
 {
-    "input": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/breastMissing_20.csv",
+    "input": "./breast/breastMissing_20.csv",
     "output": "breastImputed_20",
-    "ref": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/breast.csv",
-    "output_folder": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/results/",
+    "ref": "./breast/breast.csv",
+    "output_folder": "./breast/results/",
     "num_iterations": 2001,
     "batch_size": 128, 
     "alpha": 10, 
