@@ -27,14 +27,16 @@ However, there are a few arguments which you may want to change. You can do this
 Run with a parameters.json file: `python protogain.py --parameters /path/to/parameters.json`
 Run with command line arguments: `python protogain.py -i /path/to/file_to_impute.csv -o imputed_name --ofolder ./results/ --it 2001`
 
-#### Arguments
+#### Arguments:
 
-`-i`: Path to file to impute
-`-o`: Name of imputed file
-`--ofolder`: Path to the output folder
-`--it`: Number of iterations to train the model
-`--outall`: Set this argument to `1` if you want to output every metric
-`--override`: Set this argumento to `1` if you want to delete the previously created files when writing the new output
+`-i`: Path to file to impute<br> 
+`-o`: Name of imputed file<br> 
+`--ofolder`: Path to the output folder<br> 
+`--it`: Number of iterations to train the model<br> 
+`--outall`: Set this argument to `1` if you want to output every metric<br> 
+`--override`: Set this argumento to `1` if you want to delete the previously created files when writing the new output<br> 
+
+WORK IN PROGRESS
 
 
 
