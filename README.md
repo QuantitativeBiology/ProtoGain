@@ -11,11 +11,30 @@ In this repository you may find a PyTorch implementation of Generative Adversari
 
 ## Installation
 
-1. Clone this repository  `git clone https://github.com/QuantitativeBiology/ProtoGain/`
+1. Clone this repository:  `git clone https://github.com/QuantitativeBiology/ProtoGain/`
+2. Create a Python environment: `conda create -n proto python=3.10`
+3. Activate the previously created environment: `conda activate proto`
+4. Install the necessary packages: `pip install -r packages.txt`
+
 
 ## Usage
 
-Instructions on how to use your project and any relevant examples.
+The most straightforward and simplest way to run ProtoGain is to run: `python protogain.py -i /path/to/file_to_impute.csv`
+
+
+However, there are a few arguments which you may want to change. You can do this using a parameters.json file (you may find an example in `ProtoGain/breast/parameters.json`) or you can choose them directly in the command line.
+
+Run with a parameters.json file: `python protogain.py --parameters /path/to/parameters.json`
+Run with command line arguments: `python protogain.py -i /path/to/file_to_impute.csv -o imputed_name --ofolder ./results/ --it 2001`
+
+#### Arguments
+
+`-i`: Path to file to impute
+`-o`: Name of imputed file
+`--ofolder`: Path to the output folder
+`--it`: Number of iterations to train the model
+`--outall`: Set this argument to `1` if you want to output every metric
+`--override`: Set this argumento to `1` if you want to delete the previously created files when writing the new output
 
 
 
