@@ -10,12 +10,11 @@ class Params:
         output="imputed",
         ref=None,
         output_folder=f"{os.getcwd()}/results/",
-        num_iterations=2000,
+        num_iterations=2001,
         batch_size=128,
-        alpha=0.2,
-        miss_rate=0.2,
+        alpha=10,
+        miss_rate=0.1,
         hint_rate=0.9,
-        train_ratio=0.8,
         lr_D=0.001,
         lr_G=0.001,
         override=0,
@@ -30,7 +29,6 @@ class Params:
         self.alpha = alpha
         self.miss_rate = miss_rate
         self.hint_rate = hint_rate
-        self.train_ratio = train_ratio
         self.lr_D = lr_D
         self.lr_G = lr_G
         self.override = override
@@ -58,7 +56,6 @@ class Params:
         alpha = params["alpha"]
         miss_rate = params["miss_rate"]
         hint_rate = params["hint_rate"]
-        train_ratio = params["train_ratio"]
         lr_D = params["lr_D"]
         lr_G = params["lr_G"]
         override = params["override"]
@@ -74,7 +71,6 @@ class Params:
             alpha,
             miss_rate,
             hint_rate,
-            train_ratio,
             lr_D,
             lr_G,
             override,

@@ -29,14 +29,11 @@ def init_arg():
     parser.add_argument(
         "--ofolder", default=os.getcwd() + "/results/", help="path to output folder"
     )
-    parser.add_argument("--it", type=int, default=2000, help="number of iterations")
+    parser.add_argument("--it", type=int, default=2001, help="number of iterations")
     parser.add_argument("--batchsize", type=int, default=128, help="batch size")
     parser.add_argument("--alpha", type=float, default=10, help="alpha")
-    parser.add_argument("--miss", type=float, default=0.2, help="missing rate")
+    parser.add_argument("--miss", type=float, default=0.1, help="missing rate")
     parser.add_argument("--hint", type=float, default=0.8, help="hint rate")
-    parser.add_argument(
-        "--trainratio", help="percentage of data to be used as a train set"
-    )
     parser.add_argument(
         "--lrd", type=float, default=0.001, help="learning rate for the discriminator"
     )
@@ -68,7 +65,6 @@ if __name__ == "__main__":
         alpha = args.alpha
         miss_rate = args.miss
         hint_rate = args.hint
-        train_ratio = args.trainratio
         lr_D = args.lrd
         lr_G = args.lrg
         parameters_file = args.parameters
@@ -86,7 +82,6 @@ if __name__ == "__main__":
             alpha = params.alpha
             miss_rate = params.miss_rate
             hint_rate = params.hint_rate
-            train_ration = params.train_ratio
             lr_D = params.lr_D
             lr_G = params.lr_G
             override = params.override
@@ -103,12 +98,14 @@ if __name__ == "__main__":
                 alpha,
                 miss_rate,
                 hint_rate,
-                train_ratio,
                 lr_D,
                 lr_G,
                 override,
                 output_all,
             )
+
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
 
         if missing_file is None:
             print("Input file not provided")

@@ -5,13 +5,11 @@
     "output_folder": "/home/leandrosobral/LeandroSobralThesis/ProtoGain/breast/results/",
     "num_iterations": 2001,
     "batch_size": 128, 
-    "alpha": 0.1, 
+    "alpha": 10, 
     "miss_rate": 0.1, 
     "hint_rate": 0.9, 
-    "train_ratio": 0.8,
     "lr_D": 0.001, 
     "lr_G": 0.001,
-    "num_runs": 50,
     "override": 1,
     "output_all": 1
     
