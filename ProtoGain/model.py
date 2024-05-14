@@ -65,6 +65,12 @@ class Network:
             data_imputed_scaled.detach().numpy()
         )
 
+        utils.create_csv(
+            cls.metrics.data_imputed,
+            f"{cls.hypers.output_folder}{cls.hypers.output}",
+            cls.hypers.header,
+        )
+
     def _evaluate_impute(cls, data: Data):
         sample_G = cls.generate_sample(data.ref_dataset_scaled, data.ref_mask)
         data_imputed_scaled = data.ref_dataset_scaled * data.ref_mask + sample_G * (

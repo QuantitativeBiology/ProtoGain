@@ -10,6 +10,7 @@ class Params:
         output="imputed",
         ref=None,
         output_folder=f"{os.getcwd()}/results/",
+        header=None,
         num_iterations=2001,
         batch_size=128,
         alpha=10,
@@ -24,6 +25,7 @@ class Params:
         self.output = output
         self.output_folder = output_folder
         self.ref = ref
+        self.header = header
         self.num_iterations = num_iterations
         self.batch_size = batch_size
         self.alpha = alpha
@@ -66,6 +68,7 @@ class Params:
             output,
             ref,
             output_folder,
+            None,
             num_iterations,
             batch_size,
             alpha,

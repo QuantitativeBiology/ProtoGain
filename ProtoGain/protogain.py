@@ -33,7 +33,7 @@ def init_arg():
     parser.add_argument("--batchsize", type=int, default=128, help="batch size")
     parser.add_argument("--alpha", type=float, default=10, help="alpha")
     parser.add_argument("--miss", type=float, default=0.1, help="missing rate")
-    parser.add_argument("--hint", type=float, default=0.8, help="hint rate")
+    parser.add_argument("--hint", type=float, default=0.9, help="hint rate")
     parser.add_argument(
         "--lrd", type=float, default=0.001, help="learning rate for the discriminator"
     )
@@ -114,10 +114,12 @@ if __name__ == "__main__":
             df_missing = pd.read_csv(missing_file)
             missing = df_missing.values
             missing_header = df_missing.columns.tolist()
+            params.update_hypers(header=missing_header)
         elif missing_file.endswith(".tsv"):
             df_missing = utils.build_protein_matrix(missing_file)
             missing = df_missing.values
             missing_header = df_missing.columns.tolist()
+            params.update_hypers(header=missing_header)
         else:
             print("Invalid file format")
             exit(2)
