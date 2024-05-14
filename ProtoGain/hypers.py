@@ -15,6 +15,8 @@ class Params:
         batch_size=128,
         alpha=10,
         miss_rate=0.1,
+        alpha=10,
+        miss_rate=0.1,
         hint_rate=0.9,
         lr_D=0.001,
         lr_G=0.001,
