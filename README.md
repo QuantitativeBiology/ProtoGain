@@ -13,7 +13,7 @@ In this repository you may find a PyTorch implementation of Generative Adversari
 ## Installation
 
 1. Clone this repository:  `git clone https://github.com/QuantitativeBiology/ProtoGain/`
-2. Create a Python environment: `conda create -n proto python=3.10`
+2. Create a Python environment: `conda create -n proto python=3.10` if you have conda installed
 3. Activate the previously created environment: `conda activate proto`
 4. Install the necessary packages: `pip install -r libraries.txt`
 
