@@ -39,7 +39,7 @@ Run with command line arguments: `python protogain.py -i /path/to/file_to_impute
 `-o`: Name of imputed file<br> 
 `--ofolder`: Path to the output folder<br> 
 `--it`: Number of iterations to train the model<br> 
-`--miss_rate`: The percentage of values to be concealed during the evaluation run (from `0` to `1`)<br>
+`--miss`: The percentage of values to be concealed during the evaluation run (from `0` to `1`)<br>
 `--outall`: Set this argument to `1` if you want to output every metric<br> 
 `--override`: Set this argument to `1` if you want to delete the previously created files when writing the new output<br> 
 
@@ -62,7 +62,7 @@ To simply impute `breastMissing_20.csv` run: `python protogain.py -i ./breast/br
 If you want to compare the imputation with the original dataset run: `python protogain.py -i ./breast/breastMissing_20.csv --ref ./breast/breast.csv` or `python protogain.py --parameters ./breast/parameters.json`
 
 
-If you want to go deep in you analysis of every metric you either set `--outall` to `1` or you run the code in an IPython console, this way you can access every variable you want in the `metrics` object, e.g. `metrics.loss_D`.
+If you want to go deep in the analysis of every metric you either set `--outall` to `1` or you run the code in an IPython console, this way you can access every variable you want in the `metrics` object, e.g. `metrics.loss_D`.
 
 
 ## References
