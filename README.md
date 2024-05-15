@@ -45,7 +45,7 @@ Run with command line arguments: `python protogain.py -i /path/to/file_to_impute
 
 
 
-If you want to test the efficacy of the code you may give a reference file containing the a complete version of the dataset (without missing values): `python protogain.py -i /path/to/file_to_impute.csv --ref /path/to/complete_dataset.csv`
+If you want to test the efficacy of the code you may give a reference file containing a complete version of the dataset (without missing values): `python protogain.py -i /path/to/file_to_impute.csv --ref /path/to/complete_dataset.csv`
 
 Running this way will calculate the RMSE of the imputation in relation to the complete dataset.
 
