@@ -30,7 +30,7 @@ Running in this manner will result in two separate training phases.
 
 However, there are a few arguments which you may want to change. You can do this using a parameters.json file (you may find an example in `ProtoGain/breast/parameters.json`) or you can choose them directly in the command line.
 
-Run with a parameters.json file: `python protogain.py --parameters /path/to/parameters.json`
+Run with a parameters.json file: `python protogain.py --parameters /path/to/parameters.json`<br>
 Run with command line arguments: `python protogain.py -i /path/to/file_to_impute.csv -o imputed_name --ofolder ./results/ --it 2001`
 
 #### Arguments:
@@ -45,7 +45,7 @@ Run with command line arguments: `python protogain.py -i /path/to/file_to_impute
 
 
 
-If you want to test the efficacy of the code you may give a reference file containing the same dataset but without missing values: `python protogain.py -i /path/to/file_to_impute.csv --ref /path/to/complete_dataset.csv`
+If you want to test the efficacy of the code you may give a reference file containing the a complete version of the dataset (without missing values): `python protogain.py -i /path/to/file_to_impute.csv --ref /path/to/complete_dataset.csv`
 
 Running this way will calculate the RMSE of the imputation in relation to the complete dataset.
 
@@ -54,7 +54,7 @@ Running this way will calculate the RMSE of the imputation in relation to the co
 
 In this repository you may find a folder named `breast`, inside it you have a breast cancer diagnostic dataset [[2]](#2) which you may use to try out the code.
 
-`breast.csv`: complete dataset
+`breast.csv`: complete dataset<br>
 `breastMissing_20.csv`: the same dataset but with 20% of its values taken out
 
 
@@ -67,6 +67,6 @@ If you want to go deep in you analysis of every metric you either set `--outall`
 
 ## References
 <a id="1">[1]</a> 
-J. Yoon, J. Jordon & M. van der Schaar (2018). GAIN: Missing Data Imputation using Generative Adversarial Nets
+J. Yoon, J. Jordon & M. van der Schaar (2018). GAIN: Missing Data Imputation using Generative Adversarial Nets <br>
 <a id="2">[2]</a> 
 https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic
