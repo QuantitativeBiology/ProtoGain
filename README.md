@@ -58,7 +58,7 @@ In this repository you may find a folder named `breast`, inside it you have a br
 `breastMissing_20.csv`: the same dataset but with 20% of its values taken out
 
 
-To simply impute `breastMissing_20.csv` run: `python protogain.py -i ./breast/breastMissing_20.csv`
+To simply impute `breastMissing_20.csv` run: `python protogain.py -i ./breast/breastMissing_20.csv` <br>
 If you want to compare the imputation with the original dataset run: `python protogain.py -i ./breast/breastMissing_20.csv --ref ./breast/breast.csv` or `python protogain.py --parameters ./breast/parameters.json`
 
 
