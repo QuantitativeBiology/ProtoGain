@@ -34,7 +34,7 @@ setup(
     license="BSD-3-Clause",  
     entry_points={
         "console_scripts": [
-            "protogain=protogain.protogain:main",  # CLI command to run the main function
+            "protogain=ProtoGain.protogain:main",  # CLI command to run the main function
         ],
     },
 )
