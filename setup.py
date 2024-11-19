@@ -30,7 +30,7 @@ setup(
         "License :: OSI Approved :: BSD License",  
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",  # Minimum Python version
+    python_requires=">=3.10",  # Minimum Python version
     license="BSD-3-Clause",  
    
    # entry_points={
