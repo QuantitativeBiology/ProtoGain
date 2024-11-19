@@ -32,9 +32,10 @@ setup(
     ],
     python_requires=">=3.6",  # Minimum Python version
     license="BSD-3-Clause",  
-    entry_points={
-        "console_scripts": [
-            "protogain=ProtoGain.protogain:main",  # CLI command to run the main function
-        ],
-    },
+   
+   # entry_points={
+    #    "console_scripts": [
+     #       "protogain=ProtoGain.protogain:main",  # CLI command to run the main function
+      #  ],
+    #},
 )
