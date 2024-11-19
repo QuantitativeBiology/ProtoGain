@@ -14,10 +14,7 @@ from .hypers import Params
 from .model import Network
 
 # Metrics and output utilities
-from .output import (
-    Metrics,
-    evaluate_performance,  # Example metric evaluation function
-)
+from .output import Metrics
 
 # Main ProtoGAIN logic
 from .protogain import (
@@ -51,7 +48,6 @@ __all__ = [
 
     # output.py
     "Metrics",
-    "evaluate_performance",
 
     # protogain.py
     "init_arg",

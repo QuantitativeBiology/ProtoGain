@@ -5,7 +5,7 @@ with open("README.md", 'r') as f:
 
 
 setup(
-    name="ProtoGAIN",  
+    name="ProtoGain",  
     version="0.1.0",  
     author="Diogo Ferreira, Emanuel Gonçalves, Jorge Ribeiro, Leandro Sobral, Rita Gama",  
     author_email="quantitative-biology@googlegroups.com",  
