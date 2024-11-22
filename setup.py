@@ -6,7 +6,7 @@ with open("README.md", 'r') as f:
 
 setup(
     name="ProtoGain",  
-    version="0.1.0",  
+    version="0.1.3",  
     author="Diogo Ferreira, Emanuel Gonçalves, Jorge Ribeiro, Leandro Sobral, Rita Gama",  
     author_email="quantitative-biology@googlegroups.com",  
     description="A Python package for synthetic proteomics data augmentation using ProtoGAIN",
@@ -22,11 +22,10 @@ setup(
         "pandas",
         "scikit-learn",
         "optuna",
-        "argparse",
         "psutil",
     ],  
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: BSD License",  
         "Operating System :: OS Independent",
     ],

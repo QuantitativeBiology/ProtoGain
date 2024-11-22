@@ -1,8 +1,9 @@
-from hypers import Params
-from model import Network
-from dataset import Data
-from output import Metrics
-import utils
+from .hypers import Params
+from .model import Network
+from .dataset import Data
+from .output import Metrics
+from .utils import *
+
 
 import torch
 from torch import nn
@@ -117,7 +118,7 @@ if __name__ == "__main__":
             missing_header = df_missing.columns.tolist()
             params.update_hypers(header=missing_header)
         elif missing_file.endswith(".tsv"):
-            df_missing = utils.build_protein_matrix(missing_file)
+            df_missing = build_protein_matrix(missing_file)
             missing = df_missing.values
             missing_header = df_missing.columns.tolist()
             params.update_hypers(header=missing_header)

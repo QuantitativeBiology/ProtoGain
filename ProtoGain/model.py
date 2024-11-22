@@ -1,13 +1,14 @@
-from hypers import Params
-from dataset import Data
-from output import Metrics
+from .hypers import Params
+from .dataset import Data
+from .output import Metrics
 
 import torch
 from torch import nn
 import numpy as np
 
 from tqdm import tqdm
-import utils
+from ProtoGain.utils import *
+
 import psutil
 
 from torchinfo import summary
@@ -65,7 +66,7 @@ class Network:
             data_imputed_scaled.detach().numpy()
         )
 
-        utils.create_csv(
+        create_csv(
             cls.metrics.data_imputed,
             f"{cls.hypers.output_folder}{cls.hypers.output}",
             cls.hypers.header,
@@ -93,7 +94,7 @@ class Network:
                 ]
             )
 
-        utils.create_csv(
+        create_csv(
             ref_imputed,
             f"{cls.hypers.output_folder}test_imputed",
             ["original", "imputed", "sample", "feature"],
@@ -162,7 +163,7 @@ class Network:
         pbar = tqdm(range(cls.hypers.num_iterations))
         for it in pbar:
 
-            mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
+            mb_idx = sample_idx(train_size, cls.hypers.batch_size)
 
             batch = data.dataset_scaled[mb_idx].detach().clone()
             mask_batch = data.mask[mb_idx].detach().clone()
@@ -199,7 +200,7 @@ class Network:
         cls.impute(data)
 
         if cls.hypers.output_all == 1:
-            utils.output(
+            output(
                 cls.metrics.data_imputed,
                 cls.hypers.output_folder,
                 cls.hypers.output,
@@ -231,7 +232,7 @@ class Network:
 
         pbar = tqdm(range(cls.hypers.num_iterations))
         for it in pbar:
-            mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
+            mb_idx = sample_idx(train_size, cls.hypers.batch_size)
 
             train_batch = data.ref_dataset_scaled[mb_idx].detach().clone()
             train_mask_batch = data.ref_mask[mb_idx].detach().clone()
@@ -270,7 +271,7 @@ class Network:
         cls._evaluate_impute(data)
 
         if cls.hypers.output_all == 1:
-            utils.output(
+            output(
                 cls.metrics.ref_data_imputed,
                 cls.hypers.output_folder,
                 cls.hypers.output,
@@ -316,7 +317,7 @@ class Network:
         pbar = tqdm(range(cls.hypers.num_iterations))
         for it in pbar:
 
-            mb_idx = utils.sample_idx(train_size, cls.hypers.batch_size)
+            mb_idx = sample_idx(train_size, cls.hypers.batch_size)
 
             batch = data.dataset_scaled[mb_idx].detach().clone()
             mask_batch = data.mask[mb_idx].detach().clone()
@@ -348,7 +349,7 @@ class Network:
         cls.impute(data)
 
         if cls.hypers.output_all == 1:
-            utils.output(
+            output(
                 cls.metrics.data_imputed,
                 cls.hypers.output_folder,
                 cls.hypers.output,

@@ -1,4 +1,4 @@
-from hypers import Params
+from .hypers import Params
 import numpy as np
 import pandas as pd
 import os
