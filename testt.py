@@ -29,10 +29,10 @@ print(utils.__file__)
 import ProtoGain.utils as utils
 print(dir(utils))  # To list all available attributes in `utils`
 import torch
-from ProtoGain.model import Network
-from ProtoGain.hypers import Params
-from ProtoGain.output import Metrics
-from ProtoGain.dataset import Data
+from ProtoGain import Network
+from ProtoGain import Params
+from ProtoGain import Metrics
+from ProtoGain import Data
 import pandas as pd
 import numpy as np
 
