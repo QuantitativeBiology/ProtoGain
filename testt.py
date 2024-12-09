@@ -104,7 +104,7 @@ def test_network():
     # Perform training (imputation)
     print("Running imputation...")
     try:
-        network.train(data=data, missing_header=missing_header)  # Pass missing_header
+        network.train_ref(data=data, missing_header=missing_header)  # Pass missing_header
         print("Imputation completed successfully!")
     except Exception as e:
         print(f"Error during imputation: {e}")
