@@ -7,7 +7,7 @@ from torch import nn
 import numpy as np
 
 from tqdm import tqdm
-from ProtoGain.utils import *
+from ProtoGen.utils import *
 
 import psutil
 

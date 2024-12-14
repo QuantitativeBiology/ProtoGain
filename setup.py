@@ -5,8 +5,8 @@ with open("README.md", 'r') as f:
 
 
 setup(
-    name="ProtoGain",  
-    version="0.1.3",  
+    name="ProtoGen",
+    version="0.2.0",
     author="Diogo Ferreira, Emanuel Gonçalves, Jorge Ribeiro, Leandro Sobral, Rita Gama",  
     author_email="quantitative-biology@googlegroups.com",  
     description="A Python package for synthetic proteomics data augmentation using ProtoGAIN",

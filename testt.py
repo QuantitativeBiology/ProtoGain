@@ -4,8 +4,8 @@
 #args = ProtoGain.init_arg()
 #print(f"Initialized arguments: {args}")
 
-from ProtoGain import create_csv  
-from ProtoGain import sample_idx
+from ProtoGen import create_csv  
+from ProtoGen import sample_idx
 
 data = [
     [1, 2, 3],
@@ -21,25 +21,25 @@ print(f"CSV file '{name}.csv' created successfully!")
 print(sample_idx(10, 5)) 
 
 
-from ProtoGain import utils
+from ProtoGen import utils
 
-import ProtoGain.utils as utils
+import ProtoGen.utils as utils
 print(utils.__file__)
 
-import ProtoGain.utils as utils
+import ProtoGen.utils as utils
 print(dir(utils))  # To list all available attributes in `utils`
 import torch
-from ProtoGain import Network
-from ProtoGain import Params
-from ProtoGain import Metrics
-from ProtoGain import Data
+from ProtoGen import Network
+from ProtoGen import Params
+from ProtoGen import Metrics
+from ProtoGen import Data
 import pandas as pd
 import numpy as np
 
 def test_network():
     # Load the dataset
-    dataset_path = "./ProtoGain/breast/breastMissing_20.csv"  # Input dataset with missing values
-    ref_path = "./ProtoGain/breast/breast.csv"  # Reference complete dataset
+    dataset_path = "./ProtoGen/breast/breastMissing_20.csv"  # Input dataset with missing values
+    ref_path = "./ProtoGen/breast/breast.csv"  # Reference complete dataset
     
     # Load dataset and reference
     dataset_df = pd.read_csv(dataset_path)
@@ -101,6 +101,7 @@ def test_network():
         ref=ref  # Provide reference if available
     )
     
+    print("ProtoGen")
     # Perform training (imputation)
     print("Running imputation...")
     try:

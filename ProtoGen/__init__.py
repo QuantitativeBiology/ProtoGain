@@ -1,28 +1,28 @@
 # Importing functionalities from each module in the package
 
 # Core dataset utilities
-from ProtoGain.dataset import (
+from ProtoGen.dataset import (
     Data,
     generate_hint,
     generate_mask,
 )
 
 # Hyperparameter management
-from ProtoGain.hypers import Params
+from ProtoGen.hypers import Params
 
 # Core model architecture
-from ProtoGain.model import Network
+from ProtoGen.model import Network
 
 # Metrics and output utilities
-from ProtoGain.output import Metrics
+from ProtoGen.output import Metrics
 
 # Main ProtoGAIN logic
-from ProtoGain.protogain import init_arg
+from ProtoGen.protogain import init_arg
     # Entry point for running the main pipeline
 
 
 # General utility functions
-from ProtoGain.utils import (
+from ProtoGen.utils import (
     create_csv,
     create_dist,
     create_missing,

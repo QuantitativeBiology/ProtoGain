@@ -1,4 +1,4 @@
-# ProtoGain
+# ProtoGen
 WORK STILL IN PROGRESS
 
 In this repository you may find a PyTorch implementation of Generative Adversarial Imputation Networks (GAIN) [[1]](#1) for imputing missing iBAQ values in proteomics datasets.
@@ -28,7 +28,7 @@ Running in this manner will result in two separate training phases.
 2) Imputation run: Then a proper training phase takes place using the entire dataset. An `imputed.csv` file will be created containing the imputed dataset.
 
 
-However, there are a few arguments which you may want to change. You can do this using a parameters.json file (you may find an example in `ProtoGain/breast/parameters.json`) or you can choose them directly in the command line.
+However, there are a few arguments which you may want to change. You can do this using a parameters.json file (you may find an example in `ProtoGen/breast/parameters.json`) or you can choose them directly in the command line.
 
 Run with a parameters.json file: `python protogain.py --parameters /path/to/parameters.json`<br>
 Run with command line arguments: `python protogain.py -i /path/to/file_to_impute.csv -o imputed_name --ofolder ./results/ --it 2001`
